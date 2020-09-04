@@ -7,7 +7,7 @@ from math import sqrt, pi
 import rospy
 
 
-class ObstacleDensityObserver(TopicObserver):
+class ObstacleDensityObserverTrain(TopicObserver):
     def __init__(self, name):
         # Topics to subscribe to
         topics = [("/move_base/local_costmap/costmap", OccupancyGrid)]     # list of pairs
@@ -28,9 +28,10 @@ class ObstacleDensityObserver(TopicObserver):
                 
         # Update rate
         self._rate = 10
+        self._pub_metric = rospy.Publisher('/metrics/obstacle_density', Float64, queue_size=10)
 
         # Inherit __init__ from parent class
-        super(ObstacleDensityObserver, self).__init__(
+        super(ObstacleDensityObserverTrain, self).__init__(
             name, self._rate, topics)
 
 
@@ -52,3 +53,15 @@ class ObstacleDensityObserver(TopicObserver):
         status_msg.message = "QA status"
 
         return status_msg
+    # Override this function to publish on a separate topic
+    def _run(self):
+        while not rospy.is_shutdown() and not self._stopped():
+            status_msgs = self.generate_diagnostics()
+            
+            # print(status_msgs)
+            metric = status_msgs[0].values[0].value
+
+            self._pub_metric.publish(float(metric))
+
+            self._seq += 1
+            self._rate.sleep()

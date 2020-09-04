@@ -57,6 +57,7 @@ class ModuleManager(object):
             self._observers[name] = getattr(module, name)(name)
             self._observers[name].start()
         except Exception as exc:
+            print(exc)
             print("Could not start {}".format(name))
             started = False
         return started

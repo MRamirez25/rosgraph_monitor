@@ -6,7 +6,7 @@ from sensor_msgs.msg import LaserScan
 from math import sqrt, pi
 import rospy
 
-class NarrownessObserver(TopicObserver):
+class NarrownessObserverTrain(TopicObserver):
     def __init__(self, name):# Topics to subscribe to
         topics = [("/front/scan", LaserScan)]     # list of pairs
 
@@ -20,9 +20,11 @@ class NarrownessObserver(TopicObserver):
         # Update rate
         self._rate = 10
 
+        self._pub_metric = rospy.Publisher('/metrics/narrowness', Float64, queue_size=10)
+
         # Inherit __init__ from parent class
         print(2)
-        super(NarrownessObserver, self).__init__(
+        super(NarrownessObserverTrain, self).__init__(
             name, self._rate, topics)
 
 
@@ -45,3 +47,16 @@ class NarrownessObserver(TopicObserver):
         status_msg.message = "QA status"
 
         return status_msg
+
+    # Override this function to publish on a separate topic
+    def _run(self):
+        while not rospy.is_shutdown() and not self._stopped():
+            status_msgs = self.generate_diagnostics()
+            
+            # print(status_msgs)
+            metric = status_msgs[0].values[0].value
+
+            self._pub_metric.publish(float(metric))
+
+            self._seq += 1
+            self._rate.sleep()
