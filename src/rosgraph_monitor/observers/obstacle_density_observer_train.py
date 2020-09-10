@@ -14,9 +14,12 @@ class ObstacleDensityObserverTrain(TopicObserver):
         
         # Pars
         self._w = 1
-        map_height = rospy.get_param("/move_base/local_costmap/height")
-        map_width = rospy.get_param("/move_base/local_costmap/width")
-        map_resolution = rospy.get_param("/move_base/local_costmap/resolution")
+        # map_height = rospy.get_param("/move_base/local_costmap/height")
+        # map_width = rospy.get_param("/move_base/local_costmap/width")
+        # map_resolution = rospy.get_param("/move_base/local_costmap/resolution")
+        map_height = 5
+        map_width = 5
+        map_resolution = 0.01
         map_n = int((map_width/map_resolution)*(map_height/map_resolution))
         n1 = int(0.5*(map_width-self._w)/map_resolution)
         map_n_width = int((map_width/map_resolution))
@@ -53,6 +56,7 @@ class ObstacleDensityObserverTrain(TopicObserver):
         status_msg.message = "QA status"
 
         return status_msg
+        
     # Override this function to publish on a separate topic
     def _run(self):
         while not rospy.is_shutdown() and not self._stopped():

@@ -23,7 +23,6 @@ class NarrownessObserverTrain(TopicObserver):
         self._pub_metric = rospy.Publisher('/metrics/narrowness', Float64, queue_size=10)
 
         # Inherit __init__ from parent class
-        print(2)
         super(NarrownessObserverTrain, self).__init__(
             name, self._rate, topics)
 
