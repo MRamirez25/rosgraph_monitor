@@ -64,7 +64,7 @@ class SafetyObserverTrain(TopicObserver):
         status_msg.values.append(
             KeyValue("safety", str(safety)))
         status_msg.values.append(
-            KeyValue("safety_ul", str(safety)))
+            KeyValue("safety_wl", str(safety_wl)))
         status_msg.message = "QA status"
 
         return status_msg

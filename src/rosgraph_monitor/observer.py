@@ -6,7 +6,6 @@ from diagnostic_msgs.msg import DiagnosticArray, DiagnosticStatus
 
 class Observer(object):
     def __init__(self, name, loop_rate_hz=1):
-        print(5)
         self._name = name
         self._rate = rospy.Rate(loop_rate_hz)
         self._seq = 1
@@ -18,7 +17,6 @@ class Observer(object):
 
         self._pub_diag = rospy.Publisher(
             '/diagnostics', DiagnosticArray, queue_size=10)
-        print(6)
 
     def __del__(self):
         if Observer:
@@ -95,9 +93,7 @@ class ServiceObserver(Observer):
 
 class TopicObserver(Observer):
     def __init__(self, name, loop_rate_hz, topics):
-        print(3)
         super(TopicObserver, self).__init__(name, loop_rate_hz)
-        print(4)
         self._topics = topics
         self._id = ""
         self._num_topics = len(topics)

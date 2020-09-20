@@ -17,20 +17,28 @@ class ObstacleDensityObserverTrain(TopicObserver):
         # map_height = rospy.get_param("/move_base/local_costmap/height")
         # map_width = rospy.get_param("/move_base/local_costmap/width")
         # map_resolution = rospy.get_param("/move_base/local_costmap/resolution")
-        map_height = 5
-        map_width = 5
-        map_resolution = 0.01
-        map_n = int((map_width/map_resolution)*(map_height/map_resolution))
-        n1 = int(0.5*(map_width-self._w)/map_resolution)
+
+        # To determine the costmap cells for the OD window
+        map_height = 5          # Default in ROS
+        map_width = 5           # Default in ROS
+        map_resolution = 0.01   # Default in ROS
         map_n_width = int((map_width/map_resolution))
-        n2 = map_n_width - n1
+
+        # Start and end elements
+        n1_y = int(0.5*(map_width-self._w)/map_resolution)
+        n2_y = map_n_width - n1_y
+
+        n1_x = int(0.5*map_width/map_resolution)
+        n2_x = int(n1_x+(self._w/map_resolution))
+
         self._map_i = []
-        for i in range(n1,n2,1):
-            for j in range(n1,n2,1):
+        for i in range(n1_y,n2_y,1):
+            for j in range(n1_x,n2_x,1):
                 self._map_i.append(i*map_n_width + j)
-                
+
         # Update rate
         self._rate = 10
+        # Publish topic
         self._pub_metric = rospy.Publisher('/metrics/obstacle_density', Float64, queue_size=10)
 
         # Inherit __init__ from parent class
