@@ -12,6 +12,9 @@ class SafetyObserver(TopicObserver):
     def __init__(self, name):
         topics = [("/boxer_velocity_controller/odom", Odometry), ("/front/scan", LaserScan)]     # list of pairs
         self._a_max = 1
+        
+        self._robot_w = 0.55
+        self._robot_l = 0.75
 
         self._rate = 10
 
@@ -28,7 +31,11 @@ class SafetyObserver(TopicObserver):
         d_brake = vel_x ** 2 / (2*self._a_max)
 
         # Find closest obstacle
-        d_obstacle = min(msgs[1].ranges)
+        for n in range(len(msgs[1].ranges)):
+            theta = msgs[1].angle_min + n*msgs[1].angle_increment
+            d_robot = min(abs((self._robot_w/2)*sin(theta)),abs((self._robot_l/2)*cos(theta)))
+            d_obstacles = msgs[1].ranges[n] - d_robot
+        d_obstacle = min(d_obstacles)
 
         # Determine safety level
         safety = 1.0

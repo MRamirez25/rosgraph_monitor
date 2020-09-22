@@ -19,7 +19,7 @@ class SafetyObserverTrain(TopicObserver):
 
         self._rate = 10
 
-        self._robot_w = .55
+        self._robot_w = 0.55
         self._robot_l = 0.75
 
         super(SafetyObserverTrain, self).__init__(
@@ -49,15 +49,11 @@ class SafetyObserverTrain(TopicObserver):
         d_brake = vel_x ** 2 / (2*self._a_max)
 
         # Find closest obstacle
-        d_obstacle = min(msgs[1].ranges)
-        # d_obs_n = np.argmin(msgs[1].ranges)
-
-        # Find the angle and the x and y distances and subtract the robot dimensions
-        # theta = msgs[1].angle_min + d_obs_n*msgs[1].angle_increment
-        # d_obs_x = abs(d_obs*math.cos(theta)) - 0.5 * self._robot_l
-        # d_obs_y = abs(d_obs*math.sin(theta)) - 0.5 * self._robot_w
-
-        # d_obstacle = math.sqrt(d_obs_x**2 + d_obs_y**2)
+        for n in range(len(msgs[1].ranges)):
+            theta = msgs[1].angle_min + n*msgs[1].angle_increment
+            d_robot = min(abs((self._robot_w/2)*sin(theta)),abs((self._robot_l/2)*cos(theta)))
+            d_obstacles = msgs[1].ranges[n] - d_robot
+        d_obstacle = min(d_obstacles)
 
         # Determine safety level
         safety = 1.0
