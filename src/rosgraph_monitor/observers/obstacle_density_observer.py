@@ -10,21 +10,16 @@ import rospy
 class ObstacleDensityObserver(TopicObserver):
     def __init__(self, name):
         # Topics to subscribe to
-        topics = [("/move_base/local_costmap/costmap", OccupancyGrid)]     # list of pairs
+        topics = [("/move_base/local_costmap/costmap", OccupancyGrid), ("/boxer_velocity_controller/odom", Odometry)]     # list of pairs
         
-        # Pars
-        self._w = 1
-        map_height = rospy.get_param("/move_base/local_costmap/height")
-        map_width = rospy.get_param("/move_base/local_costmap/width")
-        map_resolution = rospy.get_param("/move_base/local_costmap/resolution")
-        map_n = int((map_width/map_resolution)*(map_height/map_resolution))
-        n1 = int(0.5*(map_width-self._w)/map_resolution)
-        map_n_width = int((map_width/map_resolution))
-        n2 = map_n_width - n1
-        self._map_i = []
-        for i in range(n1,n2,1):
-            for j in range(n1,n2,1):
-                self._map_i.append(i*map_n_width + j)
+        # Pars ODwindow
+        self._ODw_center = [0.5, 0.0]
+        self._ODw_width = 1.0
+
+        # Pars costmap (Hardcoded for now)
+        self._costmap_width = 5.0
+        self._costmap_res = 0.01
+        self._costmap_width_n = int((self._costmap_width/self._costmap_res))
                 
         # Update rate
         self._rate = 10
@@ -37,11 +32,31 @@ class ObstacleDensityObserver(TopicObserver):
     def calculate_attr(self, msgs):
         status_msg = DiagnosticStatus()
         
-        # Determine Obstacle Density
+        # Determine yaw angle of the robot
+        quaternion = msgs[1].pose.pose.orientation
+        yaw = euler_from_quaternion([quaternion.x, quaternion.y, quaternion.z, quaternion.w])[2]
+        
+        # Init
         obstacle_density = 0.0
-        for i in self._map_i:
-            if msgs[0].data[i] != 0:
-                obstacle_density += 1.0/len(self._map_i)
+        nc=0 # number of cells in OD window
+
+        # Loop over all the local costmap grid cells
+        for n in range(len(msgs[0].data)):
+            # Determine x and y coordinates of this cell
+            x = (n%self._costmap_width_n)*self._costmap_res - self._costmap_width/2
+            y = int(n/self._costmap_width_n)*self._costmap_res - self._costmap_width/2
+            # Rotate to robot local coordinate system
+            xa = x*cos(yaw)+y*sin(yaw)
+            ya = -x*sin(yaw)+y*cos(yaw)
+            # Check if this cell is in the OD window
+            if xa < self._ODw_center[0]+(self._ODw_width/2) and xa > self._ODw_center[0]+(-self._ODw_width/2) and ya < self._ODw_center[1]+(self._ODw_width/2) and ya > self._ODw_center[1]-(self._ODw_width/2):
+                # Check if cell is occupied
+                if msgs[0].data[n] != 0:
+                    obstacle_density += 1.0
+                nc += 1
+        # Normalize OD with the number of cells in the OD window
+        if nc > 0:
+            obstacle_density = obstacle_density/nc
 
         print("obstacle_density:{0}".format(obstacle_density))
         status_msg = DiagnosticStatus()
