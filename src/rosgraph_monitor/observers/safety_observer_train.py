@@ -19,6 +19,9 @@ class SafetyObserverTrain(TopicObserver):
 
         self._rate = 10
 
+        self._robot_w = .55
+        self._robot_l = 0.75
+
         super(SafetyObserverTrain, self).__init__(
             name, self._rate, topics)
 
@@ -47,6 +50,14 @@ class SafetyObserverTrain(TopicObserver):
 
         # Find closest obstacle
         d_obstacle = min(msgs[1].ranges)
+        # d_obs_n = np.argmin(msgs[1].ranges)
+
+        # Find the angle and the x and y distances and subtract the robot dimensions
+        # theta = msgs[1].angle_min + d_obs_n*msgs[1].angle_increment
+        # d_obs_x = abs(d_obs*math.cos(theta)) - 0.5 * self._robot_l
+        # d_obs_y = abs(d_obs*math.sin(theta)) - 0.5 * self._robot_w
+
+        # d_obstacle = math.sqrt(d_obs_x**2 + d_obs_y**2)
 
         # Determine safety level
         safety = 1.0
@@ -64,7 +75,7 @@ class SafetyObserverTrain(TopicObserver):
         status_msg.values.append(
             KeyValue("safety", str(safety)))
         status_msg.values.append(
-            KeyValue("safety_ul", str(safety)))
+            KeyValue("safety_wl", str(safety_wl)))
         status_msg.message = "QA status"
 
         return status_msg
