@@ -22,8 +22,9 @@ class PerformanceObserverTrain(TopicObserver):
         self._y_path_prev = 0
         self._x_robot_prev = 0
 
-        self._pub_metric0 = rospy.Publisher('/metrics/performance', Float64, queue_size=10)
-        self._pub_metric1 = rospy.Publisher('/metrics/performance_dir', Float64, queue_size=10)
+        self._pub_metric1 = rospy.Publisher('/metrics/performance2', Float64, queue_size=10)
+        self._pub_metric2 = rospy.Publisher('/metrics/performance31', Float64, queue_size=10)
+        self._pub_metric3 = rospy.Publisher('/metrics/performance32', Float64, queue_size=10)
 
         super(PerformanceObserverTrain, self).__init__(
             name, self._rate, topics)
@@ -33,6 +34,7 @@ class PerformanceObserverTrain(TopicObserver):
 
         x_robot = msgs[0].pose.pose.position.x
         y_robot = msgs[0].pose.pose.position.y
+        v_x = msgs[0].twist.twist.linear.x
         path_poses = msgs[1].poses
 
 
@@ -40,14 +42,15 @@ class PerformanceObserverTrain(TopicObserver):
         path_distance = 10 #init with a large value
         x_path = path_poses[0].pose.position.x
         y_path = path_poses[0].pose.position.y
+        print("amount of poses:%s"%len(path_poses))
         for pose in path_poses:
-            path_pose_distance = sqrt((pose.pose.position.x - x_robot)**2 + (pose.pose.position.y-y_robot)**2)
+            path_pose_distance = sqrt((pose.pose.position.x - x_robot)**2 + (pose.pose.position.y - y_robot)**2)
             if path_pose_distance < path_distance:
                 path_distance = path_pose_distance
                 x_path = pose.pose.position.x
                 y_path = pose.pose.position.y
-            if path_pose_distance > (path_distance + 0.5):
-                break # This means that the rest of the poses are further away, so stop searching
+            # if path_pose_distance > (path_distance + 0.5):
+            #     break # This means that the rest of the poses are further away, so stop searching
 
         # Calculate distance to previous point
         d_actual_path = sqrt((self._x_path_prev-x_path)**2 + (self._y_path_prev-y_path)**2 )
@@ -81,15 +84,18 @@ class PerformanceObserverTrain(TopicObserver):
         performance = t_path/self._tc
         performance_dir = t_path_dir/self._tc
 
+        performance2 = v_x/self._v_max
 
         print("performance:{0}".format(performance))
         status_msg = DiagnosticStatus()
         status_msg.level = DiagnosticStatus.OK
         status_msg.name = self._id
         status_msg.values.append(
-            KeyValue("performance", str(performance)))
+            KeyValue("performance2", str(performance2)))
         status_msg.values.append(
-            KeyValue("performance_dir", str(performance_dir)))
+            KeyValue("performance31", str(performance)))
+        status_msg.values.append(
+            KeyValue("performance32", str(performance_dir)))
         status_msg.message = "QA status"
 
         return status_msg
@@ -102,9 +108,11 @@ class PerformanceObserverTrain(TopicObserver):
             # print(status_msgs)
             metric0 = status_msgs[0].values[0].value
             metric1 = status_msgs[0].values[1].value
+            metric2 = status_msgs[0].values[2].value
 
-            self._pub_metric0.publish(float(metric0))
-            self._pub_metric1.publish(float(metric1))
+            self._pub_metric1.publish(float(metric0))
+            self._pub_metric2.publish(float(metric1))
+            self._pub_metric3.publish(float(metric2))
 
             self._seq += 1
             self._rate.sleep()
