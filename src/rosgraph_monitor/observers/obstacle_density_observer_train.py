@@ -26,11 +26,11 @@ class ObstacleDensityObserverTrain(TopicObserver):
         # Update rate
         self._rate = 10
         # Topic to publish to, instead of /diagnostics
-        self._pub_metric1 = rospy.Publisher('/metrics/obstacle_density11', Float64, queue_size=10)
-        self._pub_metric2 = rospy.Publisher('/metrics/obstacle_density12', Float64, queue_size=10)
-        self._pub_metric3 = rospy.Publisher('/metrics/obstacle_density13', Float64, queue_size=10)
-        self._pub_metric4 = rospy.Publisher('/metrics/obstacle_density21', Float64, queue_size=10)
-        self._pub_metric5 = rospy.Publisher('/metrics/obstacle_density22', Float64, queue_size=10)
+        # self._pub_metric1 = rospy.Publisher('/metrics/obstacle_density11', Float64, queue_size=10)
+        # self._pub_metric2 = rospy.Publisher('/metrics/obstacle_density12', Float64, queue_size=10)
+        # self._pub_metric3 = rospy.Publisher('/metrics/obstacle_density13', Float64, queue_size=10)
+        self._pub_metric1 = rospy.Publisher('/metrics/obstacle_density21', Float64, queue_size=10)
+        # self._pub_metric5 = rospy.Publisher('/metrics/obstacle_density22', Float64, queue_size=10)
 
         # Inherit __init__ from parent class
         super(ObstacleDensityObserverTrain, self).__init__(
@@ -79,17 +79,17 @@ class ObstacleDensityObserverTrain(TopicObserver):
             
             # print(status_msgs)
             metric1 = status_msgs[0].values[0].value
-            metric2 = status_msgs[0].values[1].value
-            metric3 = status_msgs[0].values[2].value
-            metric4 = status_msgs[0].values[3].value
-            metric5 = status_msgs[0].values[4].value
+            # metric2 = status_msgs[0].values[1].value
+            # metric3 = status_msgs[0].values[2].value
+            # metric4 = status_msgs[0].values[3].value
+            # metric5 = status_msgs[0].values[4].value
             # metric6 = status_msgs[0].values[5].value
 
             self._pub_metric1.publish(float(metric1))
-            self._pub_metric2.publish(float(metric2))
-            self._pub_metric3.publish(float(metric3))
-            self._pub_metric4.publish(float(metric4))
-            self._pub_metric5.publish(float(metric5))
+            # self._pub_metric2.publish(float(metric2))
+            # self._pub_metric3.publish(float(metric3))
+            # self._pub_metric4.publish(float(metric4))
+            # self._pub_metric5.publish(float(metric5))
             # self._pub_metric6.publish(float(metric6))
 
             self._seq += 1
