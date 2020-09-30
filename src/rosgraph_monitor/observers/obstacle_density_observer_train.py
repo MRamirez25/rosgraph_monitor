@@ -18,7 +18,7 @@ class ObstacleDensityObserverTrain(TopicObserver):
 
         rospack = rospkg.RosPack()
         path = rospack.get_path('rosgraph_monitor')
-        filename = path + '/scripts/OD_windows'
+        filename = path + '/scripts/OD_windows_train'
         # print(filename)
         with open(filename) as file:
             self._ODw_i, self._yaws = pickle.load(file)
