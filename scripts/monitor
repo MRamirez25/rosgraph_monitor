@@ -18,6 +18,7 @@ class ModuleManager(object):
     def __init__(self):
         self._modules = {}
         self._observers = {}
+        self.load_observers()
         rospy.Service('/load_observer', LoadController, self.handle_load)
         rospy.Service('/unload_observer', UnloadController, self.handle_unload)
         rospy.Service('/active_observers',
@@ -89,6 +90,6 @@ if __name__ == "__main__":
     rospy.init_node('graph_monitor')
 
     manager = ModuleManager()
-    manager.load_observers()
+    # manager.load_observers()
 
     rospy.spin()

@@ -42,6 +42,6 @@ class NarrownessObserver(TopicObserver):
         status_msg.name = self._id
         status_msg.values.append(
             KeyValue("narrowness", str(narrowness)))
-        status_msg.message = "QA status"
+        status_msg.message = "EM status"
 
         return status_msg

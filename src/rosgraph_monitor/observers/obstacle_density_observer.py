@@ -2,15 +2,20 @@ from rosgraph_monitor.observer import TopicObserver
 from std_msgs.msg import Int32
 from std_msgs.msg import Float32, Float64
 from diagnostic_msgs.msg import DiagnosticStatus, KeyValue
-from nav_msgs.msg import OccupancyGrid
+from nav_msgs.msg import OccupancyGrid, Odometry
 from math import sqrt, pi
+from math import sqrt, pi, sin, cos
 import rospy
+import rospkg
+import pickle
+import numpy as np
+from tf.transformations import euler_from_quaternion
 
 
 class ObstacleDensityObserver(TopicObserver):
     def __init__(self, name):
         # Topics to subscribe to
-        topics = [("/move_base/local_costmap/costmap", OccupancyGrid), ("/odom", Odometry)]     # list of pairs
+        topics = [("/move_base/local_costmap/costmap", OccupancyGrid), ("boxer_velocity_controller/odom", Odometry)]     # list of pairs
 
         rospack = rospkg.RosPack()
         path = rospack.get_path('rosgraph_monitor')
@@ -42,7 +47,7 @@ class ObstacleDensityObserver(TopicObserver):
         for n in self._ODw_n[yaw]:
             # Check if cell is occupied
             if msgs[0].data[n] != 0:
-                obstacle_density[i] += 1.0/length
+                obstacle_density += 1.0/length
 
         print("obstacle_density:{0}".format(obstacle_density))
         status_msg = DiagnosticStatus()
@@ -50,6 +55,6 @@ class ObstacleDensityObserver(TopicObserver):
         status_msg.name = self._id
         status_msg.values.append(
             KeyValue("obstacle_density", str(obstacle_density)))
-        status_msg.message = "QA status"
+        status_msg.message = "EM status"
 
         return status_msg

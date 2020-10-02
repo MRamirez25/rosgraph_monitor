@@ -4,20 +4,17 @@ from std_msgs.msg import Float32, Float64
 from diagnostic_msgs.msg import DiagnosticStatus, KeyValue
 from sensor_msgs.msg import Imu, LaserScan
 from nav_msgs.msg import Odometry
-from math import sqrt, sin, cos, pi, atan
+from math import sqrt
 import rospy
-import numpy as np
 
 
 class SafetyObserver(TopicObserver):
     def __init__(self, name):
-        topics = [("/boxer_velocity_controller/odom", Odometry), ("/front/scan", LaserScan)]     # list of pairs       
-        self._a_max = 0.5
-
-        self._rate = 10
-
-        self._robot_y = 0.275
-        self._robot_x = 0.20
+        topics = [("/boxer_velocity_controller/odom", Odometry), ("/front/scan", LaserScan)]     # list of pairs
+        self._a_max = 1
+        
+        self._robot_w = 0.55
+        self._robot_l = 0.75
 
         self._rate = 10
 
@@ -34,27 +31,16 @@ class SafetyObserver(TopicObserver):
         d_brake = vel_x ** 2 / (2*self._a_max)
 
         # Find closest obstacle
-        d_obstacles=[]
-        thetas = []
-        ds_robot = []
         for n in range(len(msgs[1].ranges)):
             theta = msgs[1].angle_min + n*msgs[1].angle_increment
-            thetas.append(theta)
-            if theta > -atan(self._robot_y/self._robot_x) and theta < atan(self._robot_y/self._robot_x):
-                d_robot = abs((self._robot_x)*cos(theta))
-            else:
-                d_robot = abs((self._robot_y)*sin(theta))
-            ds_robot.append(d_robot)
-            d_obstacles.append(msgs[1].ranges[n] - d_robot)
+            d_robot = min(abs((self._robot_w/2)*sin(theta)),abs((self._robot_l/2)*cos(theta)))
+            d_obstacles = msgs[1].ranges[n] - d_robot
         d_obstacle = min(d_obstacles)
-
-        indx = np.argmin(d_obstacles)
-        print(d_obstacle)
 
         # Determine safety level
         safety = 1.0
-        if (d_brake > d_obstacle):
-            safety = d_obstacle/(d_brake)
+        if (2*d_brake > d_obstacle):
+            safety = d_obstacle/(2*d_brake)
 
         #print ("d_break: {0}".format(d_break))
         #print("disntace:{0}".format(msgs[2].data))
