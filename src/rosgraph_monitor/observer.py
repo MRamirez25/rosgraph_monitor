@@ -1,8 +1,7 @@
 import threading
 import mutex
 import rospy
-from diagnostic_msgs.msg import DiagnosticArray, DiagnosticStatus
-
+from diagnostic_msgs.msg import DiagnosticArray, DiagnosticStatus, KeyValue
 
 class Observer(object):
     def __init__(self, name, loop_rate_hz=1):
@@ -98,12 +97,15 @@ class TopicObserver(Observer):
         self._id = ""
         self._num_topics = len(topics)
 
+        self._pub_phasetimes = rospy.Publisher('/phase_times', KeyValue, queue_size=10)
+
     # Every derived class needs to override this
     def calculate_attr(self, msgs):
         # do calculations
         return DiagnosticStatus()
 
     def generate_diagnostics(self):
+        phase_start_time = rospy.get_time()
         msgs = []
         received_all = True
         for topic, topic_type in self._topics:
@@ -119,5 +121,7 @@ class TopicObserver(Observer):
         if received_all:
             status_msg = self.calculate_attr(msgs)
         status_msgs.append(status_msg)
+
+        self._pub_phasetimes.publish(KeyValue("monitor",str(rospy.get_time() - phase_start_time)))
 
         return status_msgs

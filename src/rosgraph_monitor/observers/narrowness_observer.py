@@ -16,6 +16,7 @@ class NarrownessObserver(TopicObserver):
         step = (1.5 * pi)/theta_range
         self._nl = int(0.25 * pi / step)
         self._nr = int(1.25 * pi / step)
+        self._r_width = 0.55
 
         # Update rate
         self._rate = 10
@@ -34,7 +35,7 @@ class NarrownessObserver(TopicObserver):
         left_space  = min(msgs[0].ranges[self._nl],self._d_max)
         
         # Narrowness
-        narrowness = (left_space + right_space) / (2 * self._d_max)
+        narrowness = (left_space + right_space) / (self._r_width)
 
         print("narrowness:{0}".format(narrowness))
         status_msg = DiagnosticStatus()
