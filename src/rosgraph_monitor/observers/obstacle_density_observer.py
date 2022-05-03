@@ -15,7 +15,7 @@ from tf.transformations import euler_from_quaternion
 class ObstacleDensityObserver(TopicObserver):
     def __init__(self, name):
         # Topics to subscribe to
-        topics = [("/move_base/local_costmap/costmap", OccupancyGrid), ("boxer_velocity_controller/odom", Odometry)]     # list of pairs
+        topics = [("/move_base/local_costmap/costmap", OccupancyGrid), ("mobile_base_controller/odom", Odometry)]     # list of pairs
 
         rospack = rospkg.RosPack()
         path = rospack.get_path('rosgraph_monitor')
