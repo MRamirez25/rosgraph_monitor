@@ -8,7 +8,7 @@ import rospy
 
 class NarrownessObserver(TopicObserver):
     def __init__(self, name):# Topics to subscribe to
-        topics = [("/scan_raw", LaserScan)]     # list of pairs
+        topics = [("/scan_filtered", LaserScan)]     # list of pairs
 
         # Pars
         self._d_max = 1.0

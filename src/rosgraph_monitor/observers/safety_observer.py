@@ -11,7 +11,7 @@ import numpy as np
 
 class SafetyObserver(TopicObserver):
     def __init__(self, name):
-        topics = [("/mobile_base_controller/odom", Odometry), ("/scan_raw", LaserScan)]     # list of pairs
+        topics = [("/mobile_base_controller/odom", Odometry), ("/scan_filtered", LaserScan)]     # list of pairs
         self._a_max = 0.5
 
         self._rate = 10
@@ -52,10 +52,10 @@ class SafetyObserver(TopicObserver):
         print(d_obstacle)
 
         # Determine safety level
-        safety = 1.0
+        safety = 0.0
         if (d_brake > d_obstacle):
             safety = d_obstacle/(d_brake)
-
+            safety = 1 - safety
         #print ("d_break: {0}".format(d_break))
         #print("disntace:{0}".format(msgs[2].data))
         print("safety:{0}".format(safety))
